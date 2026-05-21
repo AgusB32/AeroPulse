@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo-heroes
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - airport-network
+
+  redis-geo:
+    image: redis:7
+    container_name: redis-geo
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-geo-data:/data
+    networks:
+      - airport-network
+
+  redis-pop:
+    image: redis:7
+    container_name: redis-pop
+    command: redis-server --port 6380
+    ports:
+      - "6380:6380"
+    volumes:
+      - redis-pop-data:/data
+    networks:
+      - airport-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: airport-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/airport_db
+      - REDIS_GEO_HOST=redis-geo
+      - REDIS_GEO_PORT=6379
+      - REDIS_POP_HOST=redis-pop
+      - REDIS_POP_PORT=6380
+    depends_on:
+      - mongo
+      - redis-geo
+      - redis-pop
+    volumes:
+      # Mount the data_trasport.json file from the root to the backend container
+      - ./data_trasport.json:/usr/src/app/data_trasport.json
+    networks:
+      - airport-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: airport-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/index.html:/usr/share/nginx/html/index.html
+    networks:
+      - airport-network
+
+volumes:
+  mongo-data:
+  redis-geo-data:
+  redis-pop-data:
+
+networks:
+  airport-network:
+    driver: bridge
