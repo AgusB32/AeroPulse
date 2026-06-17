@@ -12,13 +12,13 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection with automatic reconnection properties
+// Conexión a MongoDB (usando Mongoose)
 const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/airport_db';
 mongoose.connect(mongoUri)
-  .then(() => console.log('Connected to MongoDB successfully.'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('Conectado a MongoDB.'))
+  .catch(err => console.error('Error MongoDB:', err));
 
-// Initialize Redis GEO client
+// Instancia 1: Redis GEO (Puerto 6379) para búsquedas geoespaciales
 const redisGeoHost = process.env.REDIS_GEO_HOST || '127.0.0.1';
 const redisGeoPort = parseInt(process.env.REDIS_GEO_PORT || '6379', 10);
 const redisGeo = new Redis({
@@ -26,10 +26,10 @@ const redisGeo = new Redis({
   port: redisGeoPort,
   maxRetriesPerRequest: 3
 });
-redisGeo.on('connect', () => console.log(`Connected to Redis GEO at ${redisGeoHost}:${redisGeoPort}`));
-redisGeo.on('error', (err) => console.error('[Redis GEO Connect Error]', err.message));
+redisGeo.on('connect', () => console.log(`Conectado a Redis GEO en ${redisGeoHost}:${redisGeoPort}`));
+redisGeo.on('error', (err) => console.error('[Redis GEO Error]', err.message));
 
-// Initialize Redis Popularity client
+// Instancia 2: Redis Popularity (Puerto 6380) para estadísticas
 const redisPopHost = process.env.REDIS_POP_HOST || '127.0.0.1';
 const redisPopPort = parseInt(process.env.REDIS_POP_PORT || '6380', 10);
 const redisPop = new Redis({
@@ -37,8 +37,8 @@ const redisPop = new Redis({
   port: redisPopPort,
   maxRetriesPerRequest: 3
 });
-redisPop.on('connect', () => console.log(`Connected to Redis Popularity at ${redisPopHost}:${redisPopPort}`));
-redisPop.on('error', (err) => console.error('[Redis Popularity Connect Error]', err.message));
+redisPop.on('connect', () => console.log(`Conectado a Redis Popularity en ${redisPopHost}:${redisPopPort}`));
+redisPop.on('error', (err) => console.error('[Redis Popularity Error]', err.message));
 
 // Bind Redis clients to Express application context for router access
 app.set('redisGeo', redisGeo);

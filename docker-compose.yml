@@ -65,7 +65,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend/index.html:/usr/share/nginx/html/index.html
+      - ./frontend:/usr/share/nginx/html
     networks:
       - airport-network
 
